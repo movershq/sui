@@ -24,6 +24,7 @@ pub mod iblt;
 pub mod id;
 pub mod json_schema;
 pub mod messages;
+pub mod messages_checkpoint;
 pub mod move_package;
 pub mod object;
 pub mod readable_serde;
