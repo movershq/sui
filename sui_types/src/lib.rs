@@ -20,7 +20,6 @@ pub mod crypto;
 pub mod event;
 pub mod gas;
 pub mod gas_coin;
-pub mod iblt;
 pub mod id;
 pub mod json_schema;
 pub mod messages;
