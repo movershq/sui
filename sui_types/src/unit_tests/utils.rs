@@ -20,6 +20,6 @@ pub fn make_committee_key() -> (Vec<KeyPair>, Committee) {
         keys.push(inner_authority_key);
     }
 
-    let committee = Committee::new(authorities);
+    let committee = Committee::new(0, authorities);
     (keys, committee)
 }

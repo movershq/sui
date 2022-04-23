@@ -31,7 +31,6 @@ use schemars::JsonSchema;
 use serde_with::serde_as;
 use serde_with::Bytes;
 
-
 use sha3::Sha3_256;
 use crate::json_schema;
 use crate::readable_serde::encoding::Base64;
@@ -196,13 +195,11 @@ pub struct ObjectDigest(
 
 #[serde_as]
 #[derive(Eq, PartialEq, Ord, PartialOrd, Copy, Clone, Hash, Serialize, Deserialize, JsonSchema)]
-pub struct TransactionEffectsDigest(    
+pub struct TransactionEffectsDigest(
     #[schemars(with = "json_schema::Base64")]
-    #[serde_as(as = "Readable<Base64, Bytes>")] 
-    pub [u8; TRANSACTION_DIGEST_LENGTH]
+    #[serde_as(as = "Readable<Base64, Bytes>")]
+    pub [u8; TRANSACTION_DIGEST_LENGTH],
 );
-
-
 
 pub const TX_CONTEXT_MODULE_NAME: &IdentStr = ident_str!("TxContext");
 pub const TX_CONTEXT_STRUCT_NAME: &IdentStr = TX_CONTEXT_MODULE_NAME;
