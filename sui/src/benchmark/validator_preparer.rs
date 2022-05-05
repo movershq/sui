@@ -338,6 +338,7 @@ fn make_authority_state(
                 *pubx,
                 Arc::pin(secx),
                 store.clone(),
+                None,
                 genesis::clone_genesis_compiled_modules(),
                 &mut genesis::get_genesis_context(),
             )

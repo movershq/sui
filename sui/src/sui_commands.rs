@@ -27,7 +27,7 @@ use std::sync::Arc;
 use std::time::Duration;
 use sui_adapter::adapter::generate_package_id;
 use sui_adapter::genesis;
-use sui_core::authority::{AuthorityState, AuthorityStore};
+use sui_core::authority::{authority_checkpoints::CheckpointStore, AuthorityState, AuthorityStore};
 use sui_core::authority_active::ActiveAuthority;
 use sui_core::authority_client::NetworkAuthorityClient;
 use sui_core::authority_server::AuthorityServer;
@@ -529,13 +529,28 @@ pub async fn make_server(
     consensus_parameters: &ConsensusParameters,
     net_parameters: Option<Vec<AuthorityInfo>>,
 ) -> SuiResult<AuthorityServer> {
-    let store = Arc::new(AuthorityStore::open(&authority.db_path, None));
     let name = authority.public_key;
+    let secret = Arc::pin(key_pair.copy());
+
+    let mut store_path = authority.db_path.clone();
+    store_path.push("store");
+    let store = Arc::new(AuthorityStore::open(&store_path, None));
+    let mut checkpoints_path = authority.db_path.clone();
+    checkpoints_path.push("checkpoints");
+    let checkpoints = CheckpointStore::open(
+        &checkpoints_path,
+        None,
+        name,
+        committee.clone(),
+        secret.clone(),
+    )?;
+
     let state = AuthorityState::new_without_genesis(
         committee.clone(),
         name,
-        Arc::pin(key_pair.copy()),
+        secret.clone(),
         store,
+        Some(Arc::new(checkpoints)),
     )
     .await;
 
@@ -559,14 +574,28 @@ async fn make_server_with_genesis_ctx(
     preload_objects: &[Object],
     genesis_ctx: &mut TxContext,
 ) -> SuiResult<AuthorityServer> {
-    let store = Arc::new(AuthorityStore::open(&authority.db_path, None));
     let name = authority.public_key;
+    let secret = Arc::pin(key_pair.copy());
+
+    let mut store_path = authority.db_path.clone();
+    store_path.push("store");
+    let store = Arc::new(AuthorityStore::open(&store_path, None));
+    let mut checkpoints_path = authority.db_path.clone();
+    checkpoints_path.push("checkpoints");
+    let checkpoints = CheckpointStore::open(
+        &checkpoints_path,
+        None,
+        name,
+        committee.clone(),
+        secret.clone(),
+    )?;
 
     let state = AuthorityState::new(
         committee.clone(),
         name,
-        Arc::pin(key_pair.copy()),
+        secret.clone(),
         store,
+        Some(Arc::new(checkpoints)),
         preload_modules,
         genesis_ctx,
     )

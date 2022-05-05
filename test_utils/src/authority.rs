@@ -66,6 +66,7 @@ where
             *key.public_key_bytes(),
             Arc::pin(key),
             Arc::new(test_authority_store()),
+            None,
             genesis::clone_genesis_compiled_modules(),
             &mut genesis::get_genesis_context(),
         )
