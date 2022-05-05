@@ -247,7 +247,7 @@ impl SignedCheckpoint {
 
     /// Checks that the signature on the digest is correct
     pub fn check_digest(&self) -> Result<(), SuiError> {
-        self.signature.check(&self.checkpoint, self.authority)?;
+        self.signature.verify(&self.checkpoint, self.authority)?;
         Ok(())
     }
 
