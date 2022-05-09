@@ -20,6 +20,7 @@ use crate::{
 use futures::stream::FuturesOrdered;
 use tracing::{debug, error, info};
 
+mod configurable_batch_action_client;
 #[cfg(test)]
 mod tests;
 
