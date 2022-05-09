@@ -1,7 +1,7 @@
 // Copyright (c) 2022, Mysten Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
-import logo from '../assets/images/sui-icon.png';
+import logo from '~images/sui-icon.png';
 
 import st from './App.module.scss';
 

@@ -13,7 +13,17 @@
         "resolveJsonModule": true,
         "noEmit": false,
         "isolatedModules": true,
-        "outDir": "../../dist"
+        "outDir": "../../dist",
+        "baseUrl": "../../",
+        "paths": {
+            // for internal aliases start them with ~ for eslint to use the correct import group
+            "~src/*": ["./src/*"],
+            "~assets/*": ["./src/ui/assets/*"],
+            "~images/*": ["./src/ui/assets/images/*"],
+            "~redux/*": ["./src/ui/app/redux/*"],
+            "~store": ["./src/ui/app/redux/store/"],
+            "~hooks": ["./src/ui/app/hooks/"]
+        }
     },
     "include": ["../../src"],
     "exclude": ["../../build", "../../node_modules"]
