@@ -18,6 +18,7 @@ pub enum BatchAction {
     EmitBatch(TxSequenceNumber),
 }
 
+#[derive(Clone)]
 pub struct ConfigurableBatchActionClient {
     state: Arc<AuthorityState>,
     pub batch_size: i32,
@@ -34,7 +35,7 @@ impl ConfigurableBatchActionClient {
             test_time: Instant::now(),
         }
     }
-    pub fn register_action_sequence(mut self, action_sequence: Vec<BatchAction>) {
+    pub fn register_action_sequence(&mut self, action_sequence: Vec<BatchAction>) {
         self.action_sequence = action_sequence;
     }
 }

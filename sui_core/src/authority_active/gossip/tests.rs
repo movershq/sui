@@ -40,7 +40,7 @@ pub async fn test_gossip() {
 
         let _active_handle = tokio::task::spawn(async move {
             let active_state = ActiveAuthority::new(inner_state, inner_clients).unwrap();
-            active_state.spawn_all_active_processes().await
+            return active_state.spawn_all_active_processes().await;
         });
     }
 

@@ -1,6 +1,10 @@
 // Copyright (c) 2022, Mysten Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
+use crate::{
+    authority::AuthorityState, authority_aggregator::AuthorityAggregator,
+    authority_client::AuthorityAPI, safe_client::SafeClient,
+};
 use futures::{stream::FuturesUnordered, StreamExt};
 use std::{collections::HashSet, sync::Arc, time::Duration};
 use sui_types::{
@@ -11,16 +15,14 @@ use sui_types::{
         BatchInfoRequest, BatchInfoResponseItem, ConfirmationTransaction, TransactionInfoRequest,
     },
 };
-
-use crate::{
-    authority::AuthorityState, authority_aggregator::AuthorityAggregator,
-    authority_client::AuthorityAPI, safe_client::SafeClient,
-};
+use tokio::sync::oneshot::Receiver;
 
 use futures::stream::FuturesOrdered;
 use tracing::{debug, error, info};
 
 mod configurable_batch_action_client;
+#[cfg(test)]
+mod test_batch_action;
 #[cfg(test)]
 mod tests;
 
@@ -38,8 +40,11 @@ const REFRESH_FOLLOWER_PERIOD_SECS: u64 = 60;
 
 use super::ActiveAuthority;
 
-pub async fn gossip_process<A>(active_authority: &ActiveAuthority<A>, degree: usize)
-where
+pub async fn gossip_process<A>(
+    active_authority: &ActiveAuthority<A>,
+    degree: usize,
+    tr_cancellation: Receiver<()>,
+) where
     A: AuthorityAPI + Send + Sync + 'static + Clone,
 {
     // A copy of the committee
@@ -62,71 +67,80 @@ where
     let mut peer_names = HashSet::new();
     let mut gossip_tasks = FuturesUnordered::new();
 
-    // TODO: provide a clean way to get out of the loop.
-    loop {
-        debug!("Seek new peers");
+    tokio::select! {
+        _ = async {
+            loop {
+                debug!("Seek new peers");
 
-        // Find out what is the earliest time that we are allowed to reconnect
-        // to at least 2f+1 nodes.
-        let next_connect = active_authority
-            .minimum_wait_for_majority_honest_available()
-            .await;
-        debug!(
-            "Waiting for {:?}",
-            next_connect - tokio::time::Instant::now()
-        );
-        tokio::time::sleep_until(next_connect).await;
+                // Find out what is the earliest time that we are allowed to reconnect
+                // to at least 2f+1 nodes.
+                let next_connect = active_authority
+                    .minimum_wait_for_majority_honest_available()
+                    .await;
+                debug!(
+                    "Waiting for {:?}",
+                    next_connect - tokio::time::Instant::now()
+                );
+                tokio::time::sleep_until(next_connect).await;
 
-        let mut k = 0;
-        while gossip_tasks.len() < target_num_tasks {
-            let name = active_authority.state.committee.sample();
-            if peer_names.contains(name)
-                || *name == active_authority.state.name
-                || !active_authority.can_contact(*name).await
-            {
-                // Are we likely to never terminate because of this condition?
-                // - We check we have nodes left by stake
-                // - We check that we have at least 2/3 of nodes that can be contacted.
-                continue;
+                let mut k = 0;
+                while gossip_tasks.len() < target_num_tasks {
+                    let name = active_authority.state.committee.sample();
+                    if peer_names.contains(name)
+                        || *name == active_authority.state.name
+                        || !active_authority.can_contact(*name).await
+                    {
+                        // Are we likely to never terminate because of this condition?
+                        // - We check we have nodes left by stake
+                        // - We check that we have at least 2/3 of nodes that can be contacted.
+                        continue;
+                    }
+                    peer_names.insert(*name);
+                    gossip_tasks.push(async move {
+                        let peer_gossip = PeerGossip::new(*name, active_authority);
+                        // Add more duration if we make more than 1 to ensure overlap
+                        debug!("Start gossip from peer {:?}", *name);
+                        peer_gossip
+                            .spawn(Duration::from_secs(REFRESH_FOLLOWER_PERIOD_SECS + k * 15)
+                        )
+                            .await
+                    });
+                    k += 1;
+
+                    // If we have already used all the good stake, then stop here and
+                    // wait for some node to become available.
+                    let total_stake_used: usize = peer_names
+                        .iter()
+                        .map(|name| committee.weight(name))
+                        .sum::<usize>()
+                        + committee.weight(&active_authority.state.name);
+                    if committee.quorum_threshold() <= total_stake_used {
+                        break;
+                    }
+                }
+
+                // If we have no peers no need to wait for one
+                if gossip_tasks.is_empty() {
+                    continue;
+                }
+
+                // Let the peer gossip task finish
+                let (finished_name, _result) = gossip_tasks.select_next_some().await;
+                if let Err(err) = _result {
+                    active_authority.set_failure_backoff(finished_name).await;
+                    error!("Peer {:?} returned error: {}", finished_name, err);
+                } else {
+                    active_authority.set_success_backoff(finished_name).await;
+                    debug!("End gossip from peer {:?}", finished_name);
+                }
+                peer_names.remove(&finished_name);
             }
-            peer_names.insert(*name);
-            gossip_tasks.push(async move {
-                let peer_gossip = PeerGossip::new(*name, active_authority);
-                // Add more duration if we make more than 1 to ensure overlap
-                debug!("Start gossip from peer {:?}", *name);
-                peer_gossip
-                    .spawn(Duration::from_secs(REFRESH_FOLLOWER_PERIOD_SECS + k * 15))
-                    .await
-            });
-            k += 1;
+        } => {}
+        _ = tr_cancellation => {
+            debug!("Terminating gossip process.");
+            return
 
-            // If we have already used all the good stake, then stop here and
-            // wait for some node to become available.
-            let total_stake_used: usize = peer_names
-                .iter()
-                .map(|name| committee.weight(name))
-                .sum::<usize>()
-                + committee.weight(&active_authority.state.name);
-            if committee.quorum_threshold() <= total_stake_used {
-                break;
-            }
         }
-
-        // If we have no peers no need to wait for one
-        if gossip_tasks.is_empty() {
-            continue;
-        }
-
-        // Let the peer gossip task finish
-        let (finished_name, _result) = gossip_tasks.select_next_some().await;
-        if let Err(err) = _result {
-            active_authority.set_failure_backoff(finished_name).await;
-            error!("Peer {:?} returned error: {}", finished_name, err);
-        } else {
-            active_authority.set_success_backoff(finished_name).await;
-            debug!("End gossip from peer {:?}", finished_name);
-        }
-        peer_names.remove(&finished_name);
     }
 }
 
@@ -146,7 +160,8 @@ where
 
     pub async fn spawn(mut self, duration: Duration) -> (AuthorityName, Result<(), SuiError>) {
         let peer_name = self.peer_name;
-        let result = tokio::task::spawn(async move { self.gossip_timeout(duration).await }).await;
+        let result =
+            tokio::task::spawn(async move { self.gossip_with_timeout(duration).await }).await;
 
         // Return a join error.
         if result.is_err() {
@@ -164,7 +179,7 @@ where
         (peer_name, result)
     }
 
-    async fn gossip_timeout(&mut self, duration: Duration) -> Result<(), SuiError> {
+    async fn gossip_with_timeout(&mut self, duration: Duration) -> Result<(), SuiError> {
         // Global timeout, we do not exceed this time in this task.
         let mut timeout = Box::pin(tokio::time::sleep(duration));
         let mut queue = FuturesOrdered::new();
@@ -245,7 +260,6 @@ where
                 },
             };
         }
-
         Ok(())
     }
 }

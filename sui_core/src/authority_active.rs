@@ -35,6 +35,7 @@ use std::{
     time::Duration,
 };
 use sui_types::{base_types::AuthorityName, error::SuiResult};
+use tokio::sync::oneshot::{channel, Sender};
 use tokio::sync::Mutex;
 
 use crate::{
@@ -96,6 +97,8 @@ pub struct ActiveAuthority<A> {
     pub net: Arc<AuthorityAggregator<A>>,
     // Network health
     pub health: Arc<Mutex<HashMap<AuthorityName, AuthorityHealth>>>,
+    // Cancellation Sender
+    pub tx_cancellation: Option<Sender<()>>,
 }
 
 impl<A> ActiveAuthority<A> {
@@ -115,6 +118,7 @@ impl<A> ActiveAuthority<A> {
             )),
             state: authority,
             net: Arc::new(AuthorityAggregator::new(committee, authority_clients)),
+            tx_cancellation: None,
         })
     }
 
@@ -147,7 +151,7 @@ impl<A> ActiveAuthority<A> {
         entry.set_no_contact_for(Duration::from_millis(delay));
     }
 
-    // Resets retries to zero and sets no contact to zero delay.
+    /// Resets retries to zero and sets no contact to zero delay.
     pub async fn set_success_backoff(&self, name: AuthorityName) {
         let mut lock = self.health.lock().await;
         let mut entry = lock.entry(name).or_default();
@@ -155,8 +159,8 @@ impl<A> ActiveAuthority<A> {
         entry.reset_no_contact();
     }
 
-    // Checks given the current time if we should contact this authority, ie
-    // if we are past any `no contact` delay.
+    /// Checks given the current time if we should contact this authority, ie
+    /// if we are past any `no contact` delay.
     pub async fn can_contact(&self, name: AuthorityName) -> bool {
         let mut lock = self.health.lock().await;
         let entry = lock.entry(name).or_default();
@@ -168,13 +172,21 @@ impl<A> ActiveAuthority<A>
 where
     A: AuthorityAPI + Send + Sync + 'static + Clone,
 {
-    // TODO: Active tasks go here + logic to spawn them all
-    pub async fn spawn_all_active_processes(self) -> Option<()> {
+    /// Spawn all active tasks.
+    pub async fn spawn_all_active_processes(mut self) -> Option<()> {
         // Spawn a task to take care of gossip
+        let (tx_cancellation, tr_cancellation) = channel();
+        self.tx_cancellation = Some(tx_cancellation);
         let _gossip_join = tokio::task::spawn(async move {
-            gossip_process(&self, 4).await;
+            gossip_process(&self, 4, tr_cancellation).await;
         });
-
         Some(())
+    }
+
+    /// Send cancellation to the gossip process.
+    pub fn cancel_gossip_process(self) {
+        if self.tx_cancellation.is_some() {
+            _ = self.tx_cancellation.unwrap().send(());
+        }
     }
 }
