@@ -20,7 +20,9 @@ const App = () => {
         <div className={st.container}>
             <Routes>
                 <Route path="/" element={<HomePage />} />
-                <Route path="welcome" element={<WelcomePage />} />
+                <Route path="/initialize">
+                    <Route index element={<WelcomePage />} />
+                </Route>
                 <Route path="*" element={<Navigate to="/" replace={true} />} />
             </Routes>
         </div>

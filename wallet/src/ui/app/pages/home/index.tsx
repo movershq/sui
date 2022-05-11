@@ -3,7 +3,7 @@
 
 import { Link } from 'react-router-dom';
 
-import { useAppSelector } from '~hooks';
+import { useAppSelector, useInitializedGuard } from '~hooks';
 import logo from '~images/sui-icon.png';
 
 import st from './Home.module.scss';
@@ -11,7 +11,10 @@ import st from './Home.module.scss';
 const HomePage = () => {
     const loading = useAppSelector((state) => state.account.loading);
     const mnemonic = useAppSelector((state) => state.account.mnemonic);
-    return (
+    const guardChecking = useInitializedGuard(true);
+    return guardChecking ? (
+        <>...</>
+    ) : (
         <>
             <img className={st.logo} src={logo} alt="logo" />
             <h2>Under Construction</h2>

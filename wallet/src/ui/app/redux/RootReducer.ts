@@ -4,5 +4,6 @@
 import { combineReducers } from '@reduxjs/toolkit';
 
 import account from './slices/account';
+import app from './slices/app';
 
-export default combineReducers({ account });
+export default combineReducers({ account, app });
