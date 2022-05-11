@@ -85,6 +85,7 @@ const commonConfig: () => Promise<Configuration> = async () => {
             preset: 'summary',
             timings: true,
             errors: true,
+            warnings: true,
         },
         resolve: {
             extensions: ['.ts', '.tsx', '.js'],
