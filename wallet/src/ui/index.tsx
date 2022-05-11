@@ -3,6 +3,7 @@
 
 import { createRoot } from 'react-dom/client';
 import { Provider } from 'react-redux';
+import { HashRouter } from 'react-router-dom';
 
 import App from './app';
 import store from '~store';
@@ -15,7 +16,9 @@ if (!rootDom) {
 }
 const root = createRoot(rootDom);
 root.render(
-    <Provider store={store}>
-        <App />
-    </Provider>
+    <HashRouter>
+        <Provider store={store}>
+            <App />
+        </Provider>
+    </HashRouter>
 );

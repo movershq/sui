@@ -2,10 +2,12 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { useEffect } from 'react';
+import { Navigate, Route, Routes } from 'react-router-dom';
 
-import { useAppDispatch, useAppSelector } from './hooks';
-import { loadAccountFromStorage } from './redux/slices/account';
-import logo from '~images/sui-icon.png';
+import HomePage from './pages/home';
+import WelcomePage from './pages/welcome';
+import { useAppDispatch } from '~hooks';
+import { loadAccountFromStorage } from '~redux/slices/account';
 
 import st from './App.module.scss';
 
@@ -14,13 +16,13 @@ const App = () => {
     useEffect(() => {
         dispatch(loadAccountFromStorage());
     });
-    const loading = useAppSelector((state) => state.account.loading);
-    const mnemonic = useAppSelector((state) => state.account.mnemonic);
     return (
         <div className={st.container}>
-            <img className={st.logo} src={logo} alt="logo" />
-            <h2>Under Construction</h2>
-            <h3>{loading ? 'loading' : `mnemonic: ${mnemonic}`}</h3>
+            <Routes>
+                <Route path="/" element={<HomePage />} />
+                <Route path="welcome" element={<WelcomePage />} />
+                <Route path="*" element={<Navigate to="/" replace={true} />} />
+            </Routes>
         </div>
     );
 };
