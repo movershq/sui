@@ -3,7 +3,7 @@
 
 import Browser from 'webextension-polyfill';
 
-import { openInNewTab } from '~src/shared/utils';
+import { openInNewTab } from '_src/shared/utils';
 
 Browser.runtime.onInstalled.addListener((details) => {
     if (details.reason === 'install') {

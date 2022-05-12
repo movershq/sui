@@ -6,10 +6,8 @@ import { Navigate, Route, Routes } from 'react-router-dom';
 
 import HomePage from './pages/home';
 import WelcomePage from './pages/welcome';
-import { useAppDispatch } from '~hooks';
-import { loadAccountFromStorage } from '~redux/slices/account';
-
-import st from './App.module.scss';
+import { useAppDispatch } from '_hooks';
+import { loadAccountFromStorage } from '_redux/slices/account';
 
 const App = () => {
     const dispatch = useAppDispatch();

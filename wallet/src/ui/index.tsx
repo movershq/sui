@@ -6,9 +6,9 @@ import { Provider } from 'react-redux';
 import { HashRouter } from 'react-router-dom';
 
 import App from './app';
-import { initAppType } from '~redux/slices/app';
-import { getFromLocationSearch } from '~redux/slices/app/AppType';
-import store from '~store';
+import { initAppType } from '_redux/slices/app';
+import { getFromLocationSearch } from '_redux/slices/app/AppType';
+import store from '_store';
 
 import './styles/global.scss';
 

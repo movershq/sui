@@ -3,8 +3,8 @@
 
 import { Link } from 'react-router-dom';
 
-import { useAppSelector, useInitializedGuard } from '~hooks';
-import logo from '~images/sui-icon.png';
+import { useAppSelector, useInitializedGuard } from '_hooks';
+import logo from '_images/sui-icon.png';
 
 import st from './Home.module.scss';
 
