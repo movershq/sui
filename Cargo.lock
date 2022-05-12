@@ -5625,7 +5625,6 @@ dependencies = [
  "futures",
  "hex",
  "itertools",
- "log",
  "move-binary-format",
  "move-bytecode-utils",
  "move-core-types",
