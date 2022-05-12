@@ -16,7 +16,6 @@ use std::convert::{TryFrom, TryInto};
 use std::fmt;
 use std::str::FromStr;
 
-
 use anyhow::anyhow;
 use base64ct::Encoding;
 use digest::Digest;
@@ -31,11 +30,11 @@ use schemars::JsonSchema;
 use serde_with::serde_as;
 use serde_with::Bytes;
 
-use sha3::Sha3_256;
 use crate::json_schema;
 use crate::readable_serde::encoding::Base64;
 use crate::readable_serde::encoding::Hex;
 use crate::readable_serde::Readable;
+use sha3::Sha3_256;
 
 #[cfg(test)]
 #[path = "unit_tests/base_types_tests.rs"]
