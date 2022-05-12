@@ -35,15 +35,18 @@ const LAST_CONSENSUS_INDEX_ADDR: u64 = 0;
 /// authorities or non-authorities. Specifically, when storing transactions and effects,
 /// S allows SuiDataStore to either store the authority signed version or unsigned version.
 pub struct SuiDataStore<const ALL_OBJ_VER: bool, S> {
-    /// This is a map between the object ID and the latest state of the object, namely the
+    /// This is a map between the object (ID, version) and the latest state of the object, namely the
     /// state that is needed to process new transactions. If an object is deleted its entry is
     /// removed from this map.
-    objects: DBMap<ObjectID, Object>,
+    ///
+    /// Note that while this map can store all versions of an object, in practice it only stores
+    /// the most recent version.
+    objects: DBMap<ObjectKey, Object>,
 
     /// Stores all history versions of all objects.
     /// This is not needed by an authority, but is needed by a replica.
     #[allow(dead_code)]
-    all_object_versions: DBMap<(ObjectID, SequenceNumber), Object>,
+    all_object_versions: DBMap<ObjectKey, Object>,
 
     /// This is a map between object references of currently active objects that can be mutated,
     /// and the transaction that they are lock on for use by this specific authority. Where an object
@@ -174,8 +177,8 @@ impl<const ALL_OBJ_VER: bool, S: Eq + Serialize + for<'de> Deserialize<'de>>
             last_consensus_index,
         ) = reopen! (
             &db,
-            "objects";<ObjectID, Object>,
-            "all_object_versions";<(ObjectID, SequenceNumber), Object>,
+            "objects";<ObjectKey, Object>,
+            "all_object_versions";<ObjectKey, Object>,
             "owner_index";<(SuiAddress, ObjectID), ObjectRef>,
             "transaction_lock";<ObjectRef, Option<TransactionDigest>>,
             "transactions";<TransactionDigest, TransactionEnvelope<S>>,
@@ -240,7 +243,7 @@ impl<const ALL_OBJ_VER: bool, S: Eq + Serialize + for<'de> Deserialize<'de>>
         Ok(self
             .objects
             .iter()
-            .skip_to(&ObjectID::ZERO)?
+            .skip_to(&ObjectKey::ZERO)?
             .next()
             .is_none())
     }
@@ -293,12 +296,25 @@ impl<const ALL_OBJ_VER: bool, S: Eq + Serialize + for<'de> Deserialize<'de>>
 
     /// Read an object and return it, or Err(ObjectNotFound) if the object was not found.
     pub fn get_object(&self, object_id: &ObjectID) -> Result<Option<Object>, SuiError> {
-        self.objects.get(object_id).map_err(|e| e.into())
+        let obj = self
+            .objects
+            .iter()
+            .skip_prior_to(&ObjectKey::max_for_id(object_id))?
+            .next();
+
+        match obj {
+            Some(obj) if obj.0 .0 == *object_id => Ok(Some(obj.1)),
+            _ => Ok(None),
+        }
     }
 
     /// Get many objects
-    pub fn get_objects(&self, _objects: &[ObjectID]) -> Result<Vec<Option<Object>>, SuiError> {
-        self.objects.multi_get(_objects).map_err(|e| e.into())
+    pub fn get_objects(&self, objects: &[ObjectID]) -> Result<Vec<Option<Object>>, SuiError> {
+        let mut result = Vec::new();
+        for id in objects {
+            result.push(self.get_object(id)?);
+        }
+        Ok(result)
     }
 
     /// Read a lock or returns Err(TransactionLockDoesNotExist) if the lock does not exist.
@@ -409,7 +425,7 @@ impl<const ALL_OBJ_VER: bool, S: Eq + Serialize + for<'de> Deserialize<'de>>
     /// TODO: We need this today because we don't have another way to sync an account.
     pub fn insert_object_direct(&self, object_ref: ObjectRef, object: &Object) -> SuiResult {
         // Insert object
-        self.objects.insert(&object_ref.0, object)?;
+        self.objects.insert(&object_ref.into(), object)?;
 
         self.transaction_lock.get_or_insert(&object_ref, || None)?;
 
@@ -438,7 +454,9 @@ impl<const ALL_OBJ_VER: bool, S: Eq + Serialize + for<'de> Deserialize<'de>>
         batch
             .insert_batch(
                 &self.objects,
-                ref_and_objects.iter().map(|(oref, o)| (oref.0, **o)),
+                ref_and_objects
+                    .iter()
+                    .map(|(oref, o)| (ObjectKey::from(oref), **o)),
             )?
             .insert_batch(
                 &self.transaction_lock,
@@ -645,7 +663,13 @@ impl<const ALL_OBJ_VER: bool, S: Eq + Serialize + for<'de> Deserialize<'de>>
         // Delete objects.
         // Wrapped objects need to be deleted as well because we can no longer track their
         // content nor use them directly.
-        write_batch = write_batch.delete_batch(&self.objects, deleted.iter().map(|(id, _)| *id))?;
+        for key in deleted.iter() {
+            write_batch = write_batch.delete_range(
+                &self.objects,
+                &ObjectKey::min_for_id(key.0),
+                &ObjectKey::max_for_id(key.0),
+            )?;
+        }
 
         // Make an iterator over all objects that are either deleted or have changed owner,
         // along with their old owner.  This is used to update the owner index.
@@ -717,7 +741,7 @@ impl<const ALL_OBJ_VER: bool, S: Eq + Serialize + for<'de> Deserialize<'de>>
                 &self.all_object_versions,
                 written
                     .iter()
-                    .map(|(id, (_object_ref, object))| ((*id, object.version()), object)),
+                    .map(|(_, (object_ref, object))| (ObjectKey::from(object_ref), object)),
             )?;
         }
 
@@ -738,7 +762,7 @@ impl<const ALL_OBJ_VER: bool, S: Eq + Serialize + for<'de> Deserialize<'de>>
             &self.objects,
             written
                 .iter()
-                .map(|(object_id, (_, new_object))| (object_id, new_object)),
+                .map(|(_, (obj_ref, new_object))| (ObjectKey::from(obj_ref), new_object)),
         )?;
 
         // Update the indexes of the objects written
