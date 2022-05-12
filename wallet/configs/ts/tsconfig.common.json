@@ -18,6 +18,7 @@
         "paths": {
             // for internal aliases start them with _ for eslint to use the correct import group
             "_src/*": ["./src/*"],
+            "_shared/*": ["./src/shared/*"],
             "_app/*": ["./src/ui/app/*"],
             "_assets/*": ["./src/ui/assets/*"],
             "_images/*": ["./src/ui/assets/images/*"],
