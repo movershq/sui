@@ -5,6 +5,10 @@ import { useEffect } from 'react';
 import { Navigate, Route, Routes } from 'react-router-dom';
 
 import HomePage from './pages/home';
+import InitializePage from './pages/initialize';
+import CreatePage from './pages/initialize/create';
+import ImportPage from './pages/initialize/import';
+import SelectPage from './pages/initialize/select';
 import WelcomePage from './pages/welcome';
 import { useAppDispatch } from '_hooks';
 import { loadAccountFromStorage } from '_redux/slices/account';
@@ -15,15 +19,16 @@ const App = () => {
         dispatch(loadAccountFromStorage());
     });
     return (
-        <div className={st.container}>
-            <Routes>
-                <Route path="/" element={<HomePage />} />
-                <Route path="/initialize">
-                    <Route index element={<WelcomePage />} />
-                </Route>
-                <Route path="*" element={<Navigate to="/" replace={true} />} />
-            </Routes>
-        </div>
+        <Routes>
+            <Route path="/" element={<HomePage />} />
+            <Route path="welcome" element={<WelcomePage />} />
+            <Route path="/initialize" element={<InitializePage />}>
+                <Route path="select" element={<SelectPage />} />
+                <Route path="create" element={<CreatePage />} />
+                <Route path="import" element={<ImportPage />} />
+            </Route>
+            <Route path="*" element={<Navigate to="/" replace={true} />} />
+        </Routes>
     );
 };
 

@@ -12,7 +12,7 @@ export default function useInitializedGuard(initialized: boolean) {
     const navigate = useNavigate();
     useEffect(() => {
         if (!loading && initialized !== isInitialized) {
-            navigate(isInitialized ? '/' : '/initialize', { replace: true });
+            navigate(isInitialized ? '/' : '/welcome', { replace: true });
         }
     }, [loading, initialized, isInitialized, navigate]);
     return loading;

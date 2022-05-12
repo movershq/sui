@@ -1,29 +1,30 @@
 // Copyright (c) 2022, Mysten Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
-import { Link } from 'react-router-dom';
+import { Outlet } from 'react-router-dom';
 
+import Logo from '../../components/logo';
 import Loading from '_components/loading';
-import Logo from '_components/logo';
 import { useFullscreenGuard, useInitializedGuard } from '_hooks';
 
-import st from './Welcome.module.scss';
+import st from './InitializePage.module.scss';
 
-const WelcomePage = () => {
+const InitializePage = () => {
     const checkingInitialized = useInitializedGuard(false);
     const checkingFullscreen = useFullscreenGuard();
     const guardChecking = checkingFullscreen || checkingInitialized;
     return (
         <Loading loading={guardChecking}>
             <div className={st.container}>
-                <Logo size="bigger" />
-                <h1 className={st.title}>Welcome to Sui Wallet</h1>
-                <Link to="/initialize/select" className={st.btn}>
-                    Get Started
-                </Link>
+                <div className={st.header}>
+                    <Logo size="big" />
+                </div>
+                <div className={st.content}>
+                    <Outlet />
+                </div>
             </div>
         </Loading>
     );
 };
 
-export default WelcomePage;
+export default InitializePage;

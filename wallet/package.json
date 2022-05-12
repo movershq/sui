@@ -71,6 +71,7 @@
         "@mysten/sui.js": "file:../sdk/typescript",
         "bip39-light": "^1.0.7",
         "@reduxjs/toolkit": "^1.8.1",
+        "classnames": "^2.3.1",
         "react": "^18.1.0",
         "react-dom": "^18.1.0",
         "react-redux": "^8.0.1",

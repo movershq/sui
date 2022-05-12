@@ -1,0 +1,24 @@
+.container {
+    display: flex;
+    flex-flow: column nowrap;
+    align-items: center;
+    margin: 0 auto;
+    max-width: 800px;
+    padding-top: 25px;
+}
+
+.title {
+    margin: 35px 0;
+}
+
+.btn {
+    padding: 15px;
+    border-radius: 4px;
+    background-color: #8bc3df;
+    text-decoration: none;
+
+    &:visited,
+    &:active {
+        color: inherit;
+    }
+}
