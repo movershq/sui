@@ -5646,7 +5646,6 @@ dependencies = [
  "serde_json",
  "serde_yaml",
  "signature",
- "structopt",
  "sui-adapter",
  "sui-framework",
  "sui-network",
