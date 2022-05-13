@@ -18,7 +18,7 @@ const WelcomePage = () => {
             <div className={st.container}>
                 <Logo size="bigger" />
                 <h1 className={st.title}>Welcome to Sui Wallet</h1>
-                <Link to="/initialize/select" className={st.btn}>
+                <Link to="/initialize/select" className="btn">
                     Get Started
                 </Link>
             </div>

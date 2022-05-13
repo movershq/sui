@@ -6,6 +6,8 @@ import Browser from 'webextension-polyfill';
 
 import { generateMnemonic } from '_shared/cryptography/mnemonics';
 
+import type { PayloadAction } from '@reduxjs/toolkit';
+
 export const loadAccountFromStorage = createAsyncThunk(
     'account/loadAccount',
     async (): Promise<string> => {
@@ -40,7 +42,11 @@ const initialState: AccountState = {
 const accountSlice = createSlice({
     name: 'account',
     initialState,
-    reducers: {},
+    reducers: {
+        setMnemonic: (state, action: PayloadAction<string>) => {
+            state.mnemonic = action.payload;
+        },
+    },
     extraReducers: (builder) =>
         builder
             .addCase(loadAccountFromStorage.fulfilled, (state, action) => {
@@ -59,5 +65,7 @@ const accountSlice = createSlice({
                 state.createdMnemonic = null;
             }),
 });
+
+export const { setMnemonic } = accountSlice.actions;
 
 export default accountSlice.reducer;

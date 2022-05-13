@@ -3,8 +3,8 @@
 
 import { Outlet } from 'react-router-dom';
 
-import Logo from '../../components/logo';
 import Loading from '_components/loading';
+import Logo from '_components/logo';
 import { useFullscreenGuard, useInitializedGuard } from '_hooks';
 
 import st from './InitializePage.module.scss';
@@ -17,7 +17,7 @@ const InitializePage = () => {
         <Loading loading={guardChecking}>
             <div className={st.container}>
                 <div className={st.header}>
-                    <Logo size="big" />
+                    <Logo size="normal" />
                 </div>
                 <div className={st.content}>
                     <Outlet />

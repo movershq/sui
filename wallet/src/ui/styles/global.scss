@@ -8,3 +8,25 @@ body {
     color: black;
     scroll-behavior: smooth;
 }
+
+.btn {
+    padding: 15px;
+    border-radius: 4px;
+    background-color: #8bc3df;
+    text-decoration: none;
+    border: none;
+    display: inline-block;
+    font-weight: 700;
+    cursor: pointer;
+
+    &:visited,
+    &:active {
+        color: inherit;
+    }
+
+    &.disabled,
+    &[disabled] {
+        cursor: initial;
+        color: #707070;
+    }
+}

@@ -6,6 +6,7 @@ import { Navigate, Route, Routes } from 'react-router-dom';
 
 import HomePage from './pages/home';
 import InitializePage from './pages/initialize';
+import BackupPage from './pages/initialize/backup';
 import CreatePage from './pages/initialize/create';
 import ImportPage from './pages/initialize/import';
 import SelectPage from './pages/initialize/select';
@@ -26,6 +27,7 @@ const App = () => {
                 <Route path="select" element={<SelectPage />} />
                 <Route path="create" element={<CreatePage />} />
                 <Route path="import" element={<ImportPage />} />
+                <Route path="backup" element={<BackupPage />} />
             </Route>
             <Route path="*" element={<Navigate to="/" replace={true} />} />
         </Routes>
