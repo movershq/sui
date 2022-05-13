@@ -5524,7 +5524,7 @@ dependencies = [
  "sui-types",
  "tokio",
  "tonic",
- "tonic-build 0.7.2 (git+https://github.com/hyperium/tonic.git?rev=de2e4ac077c076736dc451f3415ea7da1a61a560)",
+ "tonic-build",
  "tracing",
 ]
 
@@ -6155,23 +6155,11 @@ dependencies = [
 [[package]]
 name = "tonic-build"
 version = "0.7.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d9263bf4c9bfaae7317c1c2faf7f18491d2fe476f70c414b73bf5d445b00ffa1"
-dependencies = [
- "prettyplease",
- "proc-macro2",
- "prost-build",
- "quote",
- "syn",
-]
-
-[[package]]
-name = "tonic-build"
-version = "0.7.2"
 source = "git+https://github.com/hyperium/tonic.git?rev=de2e4ac077c076736dc451f3415ea7da1a61a560#de2e4ac077c076736dc451f3415ea7da1a61a560"
 dependencies = [
  "prettyplease",
  "proc-macro2",
+ "prost-build",
  "quote",
  "syn",
 ]
@@ -6188,7 +6176,7 @@ dependencies = [
  "tokio",
  "tokio-stream",
  "tonic",
- "tonic-build 0.7.2 (registry+https://github.com/rust-lang/crates.io-index)",
+ "tonic-build",
 ]
 
 [[package]]
