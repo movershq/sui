@@ -35,8 +35,9 @@ use std::{
     time::Duration,
 };
 use sui_types::{base_types::AuthorityName, error::SuiResult};
-use tokio::sync::oneshot::{channel, Sender};
+use tokio::sync::oneshot::Sender;
 use tokio::sync::Mutex;
+use tokio::task::JoinHandle;
 
 use crate::{
     authority::AuthorityState, authority_aggregator::AuthorityAggregator,
@@ -173,20 +174,18 @@ where
     A: AuthorityAPI + Send + Sync + 'static + Clone,
 {
     /// Spawn all active tasks.
-    pub async fn spawn_all_active_processes(mut self) -> Option<()> {
+    pub async fn spawn_all_active_processes(self) -> Option<()> {
         // Spawn a task to take care of gossip
-        let (tx_cancellation, tr_cancellation) = channel();
-        self.tx_cancellation = Some(tx_cancellation);
         let _gossip_join = tokio::task::spawn(async move {
-            gossip_process(&self, 4, tr_cancellation).await;
+            gossip_process(&self, 4).await;
         });
         Some(())
     }
 
-    /// Send cancellation to the gossip process.
-    pub fn cancel_gossip_process(self) {
-        if self.tx_cancellation.is_some() {
-            _ = self.tx_cancellation.unwrap().send(());
-        }
+    /// Returns a handle so that we can cancel it in testing.
+    pub async fn spawn_gossip_cancellable(self) -> JoinHandle<()> {
+        tokio::task::spawn(async move {
+            gossip_process(&self, 4).await;
+        })
     }
 }
