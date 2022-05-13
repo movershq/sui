@@ -6,14 +6,14 @@ import { useNavigate } from 'react-router-dom';
 
 import useAppSelector from './useAppSelector';
 
-export default function useInitializedGuard(initialized: boolean) {
+export default function useInitializedGuard(initializedRequired: boolean) {
     const loading = useAppSelector((state) => state.account.loading);
     const isInitialized = useAppSelector((state) => !!state.account.mnemonic);
     const navigate = useNavigate();
     useEffect(() => {
-        if (!loading && initialized !== isInitialized) {
+        if (!loading && initializedRequired !== isInitialized) {
             navigate(isInitialized ? '/' : '/welcome', { replace: true });
         }
-    }, [loading, initialized, isInitialized, navigate]);
+    }, [loading, initializedRequired, isInitialized, navigate]);
     return loading;
 }

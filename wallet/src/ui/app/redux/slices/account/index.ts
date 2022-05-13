@@ -18,8 +18,8 @@ export const loadAccountFromStorage = createAsyncThunk(
 
 export const createMnemonic = createAsyncThunk(
     'account/createMnemonic',
-    async (): Promise<string> => {
-        const mnemonic = generateMnemonic();
+    async (existingMnemonic?: string): Promise<string> => {
+        const mnemonic = existingMnemonic || generateMnemonic();
         await Browser.storage.local.set({ mnemonic });
         return mnemonic;
     }
