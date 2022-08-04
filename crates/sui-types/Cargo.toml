@@ -13,7 +13,9 @@ itertools = "0.10.3"
 once_cell = "1.11.0"
 rand = "0.7.3"
 serde = { version = "1.0.141", features = ["derive"] }
-curve25519-dalek = { version = "3", default-features = false, features = ["serde"] }
+curve25519-dalek = { version = "3", default-features = false, features = [
+    "serde"
+] }
 serde-name = "0.2.1"
 sha2 = "0.9.9"
 sha3 = "0.10.2"
@@ -30,28 +32,26 @@ base64ct = { version = "1.5.1", features = ["std", "alloc"] }
 zeroize = "1.5.7"
 hkdf = "0.12.3"
 digest = "0.10.3"
-schemars ="0.8.10"
+schemars = "0.8.10"
 tonic = "0.7"
 strum = "^0.24"
 strum_macros = "^0.24"
 roaring = "0.9.0"
-
 # This version is incompatible with ed25519-dalek
 rand_latest = { version = "0.8.5", package = "rand" }
-
 name-variant = { git = "https://github.com/MystenLabs/mysten-infra", rev = "123c9e40b529315e1c1d91a54fb717111c3e349c" }
 typed-store = { git = "https://github.com/MystenLabs/mysten-infra", rev = "123c9e40b529315e1c1d91a54fb717111c3e349c" }
-
 move-binary-format = { git = "https://github.com/move-language/move", rev = "79071528524f08b12e9abb84c1094d8e976aa17a" }
 move-bytecode-utils = { git = "https://github.com/move-language/move", rev = "79071528524f08b12e9abb84c1094d8e976aa17a" }
-move-core-types = { git = "https://github.com/move-language/move", rev = "79071528524f08b12e9abb84c1094d8e976aa17a", features = ["address20"] }
+move-core-types = { git = "https://github.com/move-language/move", rev = "79071528524f08b12e9abb84c1094d8e976aa17a", features = [
+    "address20"
+] }
 move-disassembler = { git = "https://github.com/move-language/move", rev = "79071528524f08b12e9abb84c1094d8e976aa17a" }
 move-ir-types = { git = "https://github.com/move-language/move", rev = "79071528524f08b12e9abb84c1094d8e976aa17a" }
 move-vm-types = { git = "https://github.com/move-language/move", rev = "79071528524f08b12e9abb84c1094d8e976aa17a" }
-
-narwhal-executor = { git = "https://github.com/MystenLabs/narwhal", rev = "cdf44079efc2ced6125f6a2ee7827680be3cbd0a", package = "executor" }
-narwhal-crypto = { git = "https://github.com/MystenLabs/narwhal", rev = "cdf44079efc2ced6125f6a2ee7827680be3cbd0a", package = "crypto" }
-workspace-hack = { path = "../workspace-hack"}
+narwhal-executor = { git = "https://github.com/movingco/narwhal", rev = "56826adcd00a4b58309b08ac001bed7da396568e", package = "executor" }
+narwhal-crypto = { git = "https://github.com/movingco/narwhal", rev = "56826adcd00a4b58309b08ac001bed7da396568e", package = "crypto" }
+workspace-hack = { path = "../workspace-hack" }
 
 [dev-dependencies]
 bincode = "1.3.3"

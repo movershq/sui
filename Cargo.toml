@@ -46,8 +46,5 @@ debug = true
 [profile.bench]
 debug = true
 
-[patch."https://github.com/mystenlabs/mysten-infra.git"]
-mysten-network = { git = "https://github.com/mystenlabs//mysten-infra", rev = "123c9e40b529315e1c1d91a54fb717111c3e349c" }
-
 [patch.crates-io]
 tonic-build = { git = "https://github.com/hyperium/tonic.git", rev = "de2e4ac077c076736dc451f3415ea7da1a61a560" }

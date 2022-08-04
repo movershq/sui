@@ -21,7 +21,11 @@ num_cpus = "1.13.1"
 rocksdb = "0.18.0"
 serde_with = { version = "1.14.0", features = ["hex"] }
 tracing = "0.1.36"
-tracing-subscriber = { version = "0.3.15", features = ["time", "registry", "env-filter"] }
+tracing-subscriber = { version = "0.3.15", features = [
+    "time",
+    "registry",
+    "env-filter"
+] }
 telemetry-subscribers = { git = "https://github.com/MystenLabs/mysten-infra", rev = "123c9e40b529315e1c1d91a54fb717111c3e349c" }
 clap = { version = "3.1.17", features = ["derive"] }
 prometheus = "0.13.1"
@@ -29,18 +33,18 @@ multiaddr = "0.14.0"
 crossterm = "0.23.2"
 rand = "0.8.5"
 base64 = "0.13.0"
-
 bcs = "0.1.3"
 sui-core = { path = "../sui-core" }
 sui-config = { path = "../sui-config" }
 sui-types = { path = "../sui-types" }
 sui-sdk = { path = "../sui-sdk" }
-
-move-core-types = { git = "https://github.com/move-language/move", rev = "79071528524f08b12e9abb84c1094d8e976aa17a", features = ["address20"] }
-narwhal-node = { git = "https://github.com/MystenLabs/narwhal", rev = "cdf44079efc2ced6125f6a2ee7827680be3cbd0a", package = "node" }
+move-core-types = { git = "https://github.com/move-language/move", rev = "79071528524f08b12e9abb84c1094d8e976aa17a", features = [
+    "address20"
+] }
+narwhal-node = { git = "https://github.com/movingco/narwhal", rev = "56826adcd00a4b58309b08ac001bed7da396568e", package = "node" }
 sui-quorum-driver = { path = "../sui-quorum-driver" }
 sui-node = { path = "../sui-node" }
-workspace-hack = { path = "../workspace-hack"}
+workspace-hack = { path = "../workspace-hack" }
 test-utils = { path = "../test-utils" }
 signature = "1.5.0"
 
