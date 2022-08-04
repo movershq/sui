@@ -745,7 +745,6 @@ multihash = { version = "0.16", default-features = false, features = [
     "std"
 ] }
 multimap = { version = "0.8", default-features = false }
-mysten-network-68692745110bd6f4 = { package = "mysten-network", git = "https://github.com/MystenLabs/mysten-infra", rev = "123c9e40b529315e1c1d91a54fb717111c3e349c", default-features = false }
 named-lock = { version = "0.1", default-features = false }
 nested = { version = "0.1", default-features = false }
 network = { git = "https://github.com/MystenLabs/narwhal", rev = "cdf44079efc2ced6125f6a2ee7827680be3cbd0a", default-features = false }
@@ -2323,7 +2322,6 @@ multihash-derive = { version = "0.8", default-features = false, features = [
     "std"
 ] }
 multimap = { version = "0.8", default-features = false }
-mysten-network-68692745110bd6f4 = { package = "mysten-network", git = "https://github.com/MystenLabs/mysten-infra", rev = "123c9e40b529315e1c1d91a54fb717111c3e349c", default-features = false }
 name-variant = { git = "https://github.com/MystenLabs/mysten-infra", rev = "123c9e40b529315e1c1d91a54fb717111c3e349c", default-features = false }
 named-lock = { version = "0.1", default-features = false }
 nested = { version = "0.1", default-features = false }
